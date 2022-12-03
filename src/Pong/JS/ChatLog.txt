@@ -1188,3 +1188,25 @@ Here are the last 5 lines of code for creating a Pong game in JavaScript with im
 
   // Move the ball
   ball.x += ball.xVel
+
+Demens Deum
+center canvas in html
+
+ChatGPT
+To center a canvas element on a web page in HTML, you can use the margin: auto and display: block styles. This will cause the canvas element to be centered horizontally on the page. Here is an example of how you might do this:
+
+<html>
+  <head>
+    <style>
+      canvas {
+        margin: auto;
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="myCanvas" width="600" height="400"></canvas>
+  </body>
+</html>
+
+In this example, the canvas element will be centered horizontally on the page, with a width of 600 pixels and a height of 400 pixels. You can adjust the width and height attributes to change the size of the canvas element, and you can adjust the margin: auto and display: block styles to fine-tune the centering of the element on the page.
