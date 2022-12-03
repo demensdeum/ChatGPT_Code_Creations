@@ -1,0 +1,168 @@
+Demens Deum
+Base64 decoder to UTF-8 vanilla C console argument
+
+ChatGPT
+Here is a sample implementation of a base64 decoder in C that takes a base64 encoded string as a command line argument and decodes it to a UTF UTF-8 encoded string:
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+const char *b64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+void decode(const char *s)
+{
+    // Ensure that the input string is a multiple of 4
+    int num_pads = 0;
+    int n = strlen(s);
+    if (n % 4 != 0)
+    {
+        num_pads = 4 - n % 4;
+        for (int i = 0; i < num_pads; i++)
+        {
+            s[n + i] = '=';
+        }
+        s[n + num_pads] = '\0';
+    }
+
+    // Decode the base64 string
+    for (int i = 0, j = 0; i < n + num_pads; i += 4, j += 3)
+    {
+        // Decode 4 bytes at a time
+        char a[4], b[4];
+        for (int k = 0; k < 4; k++)
+        {
+            a[k] = s[i + k];
+            if (a[k] == '=')
+            {
+                b[k] = 0;
+            }
+            else
+            {
+                b[k] = strchr(b64, a[k]) - b64;
+            }
+        }
+
+        // Convert the decoded bytes to characters
+        char c[3];
+        c[0] = (b[0] << 2) | (b[1] >> 4);
+        c[1] = (b[1] << 4) | (b[2] >> 2);
+        c[2] = (b[2] << 6) | b[3];
+
+        // Print the characters to the output
+        for (int k = 0; k < 3 - num_pads; k++)
+        {
+            putchar(c[k]);
+        }
+    }
+}
+
+int main(int argc, char *argv[])
+{
+    // Ensure that a base64 encoded string was provided as a command line argument
+    if (argc != 2)
+    {
+        printf("Usage: %s <base64 encoded string>\n", argv[0]);
+        return 1;
+    }
+
+    // Decode the base64 encoded string
+    decode(argv[1]);
+    putchar('\n');
+
+    return 0;
+}
+
+To compile and run this program, you can use the following commands:
+
+$ gcc -o b64decoder b64decoder.c
+$ ./b64decoder <base64 encoded string>
+
+Replace <base64 encoded string> with the actual base64 encoded string that you want to decode.
+
+Note: This implementation does not include error checking for invalid input, so it is not suitable for use in a production environment. It is intended only as a simple illustration of how base64 decoding works.
+
+Demens Deum
+Can you make music?
+
+ChatGPT
+I am a large language model trained by OpenAI, so I do not have the ability to create or perform music. I am a text-based AI and my primary function is to assist with generating natural language text based on the input that I receive. I am not capable of creating or performing music.
+
+Demens Deum
+Can you create art?
+
+ChatGPT
+As a large language model trained by OpenAI, I do not have the ability to create art. I am a text-based AI and my primary function is to assist with generating natural language text based on the input that I receive. I am not capable of creating art or any other form of visual media.
+
+Demens Deum
+b64decoder.c:17:22: error: read-only variable is not assignable
+            s[n + i] = '=';
+            ~~~~~~~~ ^
+b64decoder.c:19:25: error: read-only variable is not assignable
+        s[n + num_pads] = '\0';
+        ~~~~~~~~~~~~~~~ ^
+2 errors generated.
+
+ChatGPT
+It looks like the issue is that the s variable in the decode function is declared as a const char pointer, which means it cannot be modified. Since the code is trying to modify the s variable by adding padding characters to the end of the string, this is causing a compile error.
+
+To fix this, you can remove the const keyword from the declaration of the s variable so that it is no longer a read-only variable:
+
+void decode(char *s)
+
+Alternatively, you can use a different variable to store the modified string, rather than modifying the original s variable:
+
+void decode(const char *s)
+{
+    // Make a copy of the input string
+    char *str = strdup(s);
+
+    // Ensure that the input string is a multiple of 4
+    int num_pads = 0;
+    int n = strlen(str);
+    if (n % 4 != 0)
+    {
+        num_pads = 4 - n % 4;
+        for (int i = 0; i < num_pads; i++)
+        {
+            str[n + i] = '=';
+        }
+        str[n + num_pads] = '\0';
+    }
+
+    // Decode the base64 string
+    for (int i = 0, j = 0; i < n + num_pads; i += 4, j += 3)
+    {
+        // Decode 4 bytes at a time
+        char a[4], b[4];
+        for (int k = 0; k < 4; k++)
+        {
+            a[k] = str[i + k];
+            if (a[k] == '=')
+            {
+                b[k] = 0;
+            }
+            else
+            {
+                b[k] = strchr(b64, a[k]) - b64;
+            }
+        }
+
+        // Convert the decoded bytes to characters
+        char c[3];
+        c[0] = (b[0] << 2) | (b[1] >> 4);
+        c[1] = (b[1] << 4) | (b[2] >> 2);
+        c[2] = (b[2] << 6) | b[3];
+
+        // Print the characters to the output
+        for (int k = 0; k < 3 - num_pads; k++)
+        {
+            putchar(c[k]);
+        }
+    }
+
+    // Free the memory used for the copy of the string
+    free(str);
+}
+
+Either of these changes should fix the compile error and allow the program to run successfully.
