@@ -1,0 +1,1 @@
+gcc sha256decoder.c -o sha256decoder

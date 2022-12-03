@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdint.h>
 
 // SHA256 constants
 static const uint32_t K[64] = {
@@ -129,26 +128,48 @@ void sha256(char* input, char* output)
     sprintf(output, "%x%x%x%x%x%x%x%x", h0, h1, h2, h3, h4, h5, h6, h7);
 }
 
-int main(int argc, char* argv[])
+int main(int argc, char** argv)
 {
-    // Check if a message was provided as an argument
-    if (argc < 2)
+    // Check if the correct number of arguments was provided
+    if (argc != 3)
     {
-        printf("Error: No message provided\n");
+        printf("Usage: sha256decoder <hash> <dictionary>\n");
         return 1;
     }
 
-    // Get the message from the command line argument
-    char* message = argv[1];
+    // Get the hash value and dictionary file from the command line arguments
+    char* hash = argv[1];
+    char* dict_file = argv[2];
 
-    // Create an array to store the hash value
-    char hash[65];
+    // Open the dictionary file
+    FILE* dict = fopen(dict_file, "r");
+    if (dict == NULL)
+    {
+        printf("Error: unable to open dictionary file '%s'\n", dict_file);
+        return 1;
+    }
 
-    // Hash the message
-    sha256(message, hash);
+    // Read the dictionary file line by line
+    char line[256];
+    while (fgets(line, sizeof(line), dict) != NULL)
+    {
+        // Remove the newline character from the end of the line
+        line[strcspn(line, "\n")] = 0;
 
-    // Print the hash value
-    printf("Hash: %s\n", hash);
+        // Calculate the SHA256 hash of the line
+        char hash_buf[65];
+        sha256(line, hash_buf);
 
+        // Check if the hash matches the expected value
+        // Check if the hash matches the expected value
+        if (strcmp(hash_buf, hash) == 0)
+        {
+            printf("Match found: '%s'\n", line);
+            return 0;
+        }
+    }
+
+    printf("No match found in dictionary\n");
+    fclose(dict);
     return 0;
 }
