@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Pong</title>
+</head>
+<body>
+  <canvas id="pong-canvas" width="800" height="600"></canvas>
+  <script>
+// Set up the canvas element
+var canvas = document.getElementById("pong-canvas");
+var ctx = canvas.getContext("2d");
+
+// Set the dimensions of the canvas
+canvas.width = 800;
+canvas.height = 600;
+
+// Create the paddles
+var paddleHeight = 100;
+var paddleWidth = 20;
+var leftPaddle = {
+  x: 50,
+  y: (canvas.height / 2) - (paddleHeight / 2),
+  height: paddleHeight,
+  width: paddleWidth
+};
+var rightPaddle = {
+  x: canvas.width - 50 - paddleWidth,
+  y: (canvas.height / 2) - (paddleHeight / 2),
+  height: paddleHeight,
+  width: paddleWidth
+};
+
+// Create the ball
+var ball = {
+  x: (canvas.width / 2) - 5,
+  y: (canvas.height / 2) - 5,
+  radius: 5,
+  xVelocity: 5,
+  yVelocity: 5,
+  flickering: false,
+  flickerColor: "black",
+  flickerTimer: 0  
+};
+
+// Create the score displays
+var leftScore = 0;
+var rightScore = 0;
+
+// Set up the game loop
+function gameLoop() {
+  // Clear the canvas
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Create a gradient for the background
+  var gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+  gradient.addColorStop(0, "blue");
+  gradient.addColorStop(0.5, "white");
+  gradient.addColorStop(1, "green");
+
+  // Fill the canvas with the gradient
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Draw the paddles
+  ctx.fillStyle = "black";
+  ctx.fillRect(leftPaddle.x, leftPaddle.y, leftPaddle.width, leftPaddle.height);
+  ctx.fillRect(rightPaddle.x, rightPaddle.y, rightPaddle.width, rightPaddle.height);
+
+  // Draw the ball
+  ctx.beginPath();
+  ctx.arc(ball.x, ball.y, ball.radius, 0, 2 * Math.PI);
+  // Check if the ball is currently flickering
+  if (ball.flickering) {
+    // If the ball is flickering, increment the flicker timer
+    ball.flickerTimer += 1;
+
+    // Check if the flicker timer has reached the desired speed
+    if (ball.flickerTimer % 10 === 0) {
+      // If the flicker timer has reached the desired speed, alternate the ball's color between black and white
+      ctx.fillStyle = ball.flickerColor;
+      ball.flickerColor = ball.flickerColor === "black" ? "white" : "black";
+    }
+  } else {
+    // If the ball is not flickering, set its color to black
+    ctx.fillStyle = "black";
+  }
+  
+  ctx.fill();
+
+  // Draw the scores
+  ctx.font = "16px Arial";
+  ctx.fillStyle = "black";
+  ctx.fillText(leftScore, 50, 50);
+  ctx.fillText(rightScore, canvas.width - 50, 50);
+
+  // Move the ball
+  ball.x += ball.xVelocity;
+  ball.y += ball.yVelocity;
+
+  // Check for collisions with the paddles
+  if (ball.x - ball.radius < leftPaddle.x + leftPaddle.width &&
+      ball.y + ball.radius > leftPaddle.y &&
+      ball.y - ball.radius < leftPaddle.y + leftPaddle.height
+      ) {
+    ball.xVelocity = -ball.xVelocity;
+
+    // Start the ball flickering
+    ball.flickering = true;
+    ball.flickerColor = "black";    
+  }
+  if (ball.x + ball.radius > rightPaddle.x &&
+      ball.y + ball.radius > rightPaddle.y &&
+      ball.y - ball.radius < rightPaddle.y + rightPaddle.height
+      ) {
+    ball.xVelocity = -ball.xVelocity;
+
+    // Start the ball flickering
+    ball.flickering = true;
+    ball.flickerColor = "black";    
+  }
+
+  // Check for collisions with the walls
+  if (ball.y - ball.radius < 0 ||
+      ball.y + ball.radius > canvas.height
+      ) {
+    ball.yVelocity = -ball.yVelocity;
+  }
+
+  // Check for a score
+  if (ball.x - ball.radius < 0) {
+    rightScore++;
+    resetBall();
+  }
+  if (ball.x + ball.radius > canvas.width) {
+    leftScore++;
+    resetBall();
+  }
+
+  // Call the game loop again
+  requestAnimationFrame(gameLoop);
+}
+
+// Reset the ball to the center of the screen and set a random direction
+function resetBall() {
+  ball.x = canvas.width / 2;
+  ball.y = canvas.height / 2;
+
+  // Set a random direction for the ball
+  ball.xVelocity = Math.random() < 0.5 ? -5 : 5;
+  ball.yVelocity = Math.random() < 0.5 ? -5 : 5;
+}
+
+// Update the paddles when the mouse moves
+canvas.addEventListener("mousemove", function(e) {
+  // Update the left paddle's position
+  leftPaddle.y = e.clientY - leftPaddle.height / 2;
+
+  // Update the right paddle's position
+  rightPaddle.y = e.clientY - rightPaddle.height / 2;
+});
+
+  // If the game has not started, draw the "Tap to start" text
+  ctx.font = "32px Arial";
+  ctx.textAlign = "center";
+  ctx.fillText("Tap to start", canvas.width / 2, canvas.height / 2);
+
+// Start the game when the user clicks on the canvas
+canvas.addEventListener("click", function() {
+  requestAnimationFrame(gameLoop);
+});
+  </script>
+</body>
+</html>
